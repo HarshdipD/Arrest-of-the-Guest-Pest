@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:vibration/vibration.dart';
 
 void main() => runApp(
     MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: myState()
-    )
+        home: myState(),
+    ),
 );
+
+void triggerAlarm()
+{
+  print("hey");
+}
+
 
 class myState extends StatefulWidget {
   @override
@@ -19,6 +28,22 @@ class _myStateState extends State<myState> {
   String status = "Unlocked";
   String car_name = "car";
   bool value1 = false;
+  final dataref = FirebaseDatabase.instance.reference();
+
+
+  Widget get aa{
+    return Container(
+      color: Colors.red,
+    );
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    const a = const Duration(milliseconds:20);
+    new Timer.periodic(a, (Timer t) => triggerCall);
+  }
+
 
   Widget get switchStatus {
     return new Switch(value: value1, onChanged: (value) => change());
@@ -30,26 +55,26 @@ class _myStateState extends State<myState> {
     return Padding(
       padding: const EdgeInsets.all(50.0),
       child: Container(
-        decoration: BoxDecoration(border: new Border.all(color: Colors.black), borderRadius: BorderRadius.all(Radius.circular(20.0))),
-        width: 300.0,
-        height: 300.0,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 60.0),
-          child: Column(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: Text("Lock/unlock your $car_name", style: TextStyle(fontSize: 20.0,)),
-                  ),
-                  switchStatus,
-                  Text(status, style: TextStyle(fontSize: 20.0,),),
-                ],
-              ),
-            ],
-          ),
-        )
+          decoration: BoxDecoration(color: Color.fromRGBO(198, 220, 255, 1), border: new Border.all(color: Colors.black), borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          width: 300.0,
+          height: 300.0,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 60.0),
+            child: Column(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: Text("Lock/unlock your $car_name", style: TextStyle(fontSize: 20.0,)),
+                    ),
+                    switchStatus,
+                    Text(status, style: TextStyle(fontSize: 20.0,),),
+                  ],
+                ),
+              ],
+            ),
+          )
       ),
     );
   }
@@ -57,13 +82,10 @@ class _myStateState extends State<myState> {
     return SafeArea(
         child: SizedBox(
           width: 1000.0,
-          height: 220.0,
+          height: 180.0,
           child: Container(
             decoration: new BoxDecoration(
-              image: new DecorationImage(
-                  image: new AssetImage('assets/images/cars.jpg'),
-                fit: BoxFit.cover
-              )
+                color: Colors.black54,
             ),
             child: Column(
               children: <Widget>[
@@ -72,13 +94,13 @@ class _myStateState extends State<myState> {
                     padding: const EdgeInsets.only(top: 30.0),
                     child: CircleAvatar(
                       radius: 45.0,
-                      //backgroundImage: AssetImage('images/image1.jpeg'),
+                      backgroundImage: AssetImage('assets/images/key.png'),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 68.0),
-                  child: Text("Arrest the pest guest!", style: TextStyle(color: Colors.white, fontSize: 20.0),),
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text("Keeping your asses secure lol", style: TextStyle(color: Colors.white, fontSize: 20.0),),
                 )
               ],
             ),
@@ -91,10 +113,13 @@ class _myStateState extends State<myState> {
       if(value1 == false)
       {
         status = "Locked";
+        runCode('1');
+
       }
       else
       {
         status = "Unlocked";
+        runCode('0');
       }
       value1 =! value1;
       return;
@@ -108,7 +133,7 @@ class _myStateState extends State<myState> {
             title: new Text("Change settings"),
             content: new Container(
               width: 260.0,
-              height: 100.0,
+              height: 40.0,
               decoration: new BoxDecoration(
                 shape: BoxShape.rectangle,
                 color: const Color(0xFFFFFF),
@@ -140,6 +165,8 @@ class _myStateState extends State<myState> {
                               fontFamily: 'helvetica_neue_light',
                             ),
                           ),
+                          maxLength: 8,
+                          autofocus: true,
                           onChanged: (String value){
                             print(car_name);
                             car_name = value;
@@ -152,7 +179,7 @@ class _myStateState extends State<myState> {
             ),
             actions: <Widget>[
               FlatButton(
-                  child: Text("Submit"),
+                  child: Text("Change"),
                   onPressed: (){
                     setState(() {
                       Navigator.of(context, rootNavigator: true).pop();
@@ -164,12 +191,11 @@ class _myStateState extends State<myState> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Arrest the pest guest!")),
+        title: Center(child: Text("Arrest the guest pest!")),
       ),
       body: Container(
         child: Column(
@@ -182,4 +208,35 @@ class _myStateState extends State<myState> {
       ),
     );
   }
+
+  void runCode(value){
+    dataref.child("status").update({
+      'toggle': value
+    });
+  }
+
+  void triggerCall(){
+    dataref.child("iot").once().then((DataSnapshot snapshot){
+      var a = snapshot.value['trigger'];
+      print(a);
+      if(a == '1')
+        {
+          //Trigger TO DO
+          vibratePhone();
+        }
+    });
+  }
+
+  static vibratePhone(){
+    Vibration.vibrate(pattern: [500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000]);
+  }
 }
+
+/*
+RaisedButton(
+              child: Text("fgrf"),
+              onPressed: (){
+                vibratePhone();
+              },
+            )
+ */
