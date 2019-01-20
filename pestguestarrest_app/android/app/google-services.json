@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "42445137870",
+    "firebase_url": "https://arrest-the-pest-guest.firebaseio.com",
+    "project_id": "arrest-the-pest-guest",
+    "storage_bucket": "arrest-the-pest-guest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42445137870:android:34d19ccfa1211770",
+        "android_client_info": {
+          "package_name": "uoft.pestguestarrestapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "42445137870-hg0f7vcun5riuac6mn8b5eptfifcvsrp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9L1BSzWddjDnCzYJ_VtaNz7HQVXMWFyc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
