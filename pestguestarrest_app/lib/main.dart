@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:vibration/vibration.dart';
 
@@ -12,11 +10,6 @@ void main() => runApp(
     ),
 );
 
-void triggerAlarm()
-{
-  print("hey");
-}
-
 
 class myState extends StatefulWidget {
   @override
@@ -24,24 +17,16 @@ class myState extends StatefulWidget {
 }
 
 class _myStateState extends State<myState> {
-
+  Color color = Color.fromRGBO(198, 220, 255, 1);
   String status = "Unlocked";
   String car_name = "car";
   bool value1 = false;
   final dataref = FirebaseDatabase.instance.reference();
 
-
-  Widget get aa{
-    return Container(
-      color: Colors.red,
-    );
-  }
-
   @override
   void initState(){
     super.initState();
-    const a = const Duration(milliseconds:20);
-    new Timer.periodic(a, (Timer t) => triggerCall);
+    Timer.periodic(const Duration(milliseconds:20), (Timer t) => triggerCall());
   }
 
 
@@ -55,7 +40,7 @@ class _myStateState extends State<myState> {
     return Padding(
       padding: const EdgeInsets.all(50.0),
       child: Container(
-          decoration: BoxDecoration(color: Color.fromRGBO(198, 220, 255, 1), border: new Border.all(color: Colors.black), borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          decoration: BoxDecoration(color: color, border: new Border.all(color: Colors.black), borderRadius: BorderRadius.all(Radius.circular(20.0))),
           width: 300.0,
           height: 300.0,
           child: Padding(
@@ -100,7 +85,7 @@ class _myStateState extends State<myState> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: Text("Keeping your asses secure lol", style: TextStyle(color: Colors.white, fontSize: 20.0),),
+                  child: Text("Keeping your assets safe!", style: TextStyle(color: Colors.white, fontSize: 20.0),),
                 )
               ],
             ),
@@ -203,6 +188,18 @@ class _myStateState extends State<myState> {
             header,
             head,
             settings,
+            RaisedButton(
+              child: Text("Nevermind!"),
+              onPressed: (){
+                setState(() {
+                  status = "Unlocked";
+                  color = Color.fromRGBO(198, 220, 255, 1);
+                  dataref.child("iot").update({
+                    'trigger': '1'
+                  });
+                });
+              },
+            )
           ],
         ),
       ),
@@ -215,28 +212,28 @@ class _myStateState extends State<myState> {
     });
   }
 
-  void triggerCall(){
+  void triggerCall() async{
     dataref.child("iot").once().then((DataSnapshot snapshot){
       var a = snapshot.value['trigger'];
-      print(a);
-      if(a == '1')
+      if(a == '0')
         {
           //Trigger TO DO
-          vibratePhone();
+          print(a);
+          setState((){
+              color = Color.fromRGBO(255, 71, 58, 1);
+          });
         }
+        else{
+        vibratePhone();
+        setState((){
+          color = Color.fromRGBO(198, 220, 255, 1);
+        });
+      }
     });
   }
 
-  static vibratePhone(){
+  Future<void> vibratePhone() async {
     Vibration.vibrate(pattern: [500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000]);
   }
-}
 
-/*
-RaisedButton(
-              child: Text("fgrf"),
-              onPressed: (){
-                vibratePhone();
-              },
-            )
- */
+}
